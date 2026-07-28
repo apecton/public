@@ -1,0 +1,38 @@
+# .scannerignore — patterns for files/directories to skip during scanning.
+# One pattern per line. Blank lines and lines starting with # are ignored.
+# Patterns are matched against the relative path from the scan root.
+# Simple glob wildcards: * matches within one path segment, ** matches across segments.
+
+# The scanner itself (test fixtures contain intentional secrets for testing).
+code_scanner/tests/fixtures/**
+
+# Generated files unlikely to contain secrets.
+**/__pycache__/**
+**/*.pyc
+**/*.pyo
+
+# Lock files (dependency hashes, no secrets).
+uv.lock
+package-lock.json
+yarn.lock
+poetry.lock
+
+# Image and compiled assets.
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.svg
+**/*.ico
+**/*.woff
+**/*.woff2
+**/*.ttf
+**/*.eot
+
+# Node modules.
+**/node_modules/**
+
+# Virtual environments.
+**/.venv/**
+**/venv/**
+**/.env_venv/**

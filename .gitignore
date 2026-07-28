@@ -1,1 +1,10 @@
-content_*.txt
+# python related
+__pycache__/
+.env
+
+# node related
+node_modules/
+
+*.log
+
+sample*.txt
