@@ -9,6 +9,10 @@ code_scanner/tests/fixtures/**
 # Test files contain intentional fake secrets/PII for testing the scanner.
 code_scanner/tests/test_*.py
 
+# Temporary files for git filter-repo
+replacements.txt
+.github/secret_scanning.yml
+
 # Generated files unlikely to contain secrets.
 **/__pycache__/**
 **/*.pyc
