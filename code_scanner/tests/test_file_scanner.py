@@ -26,9 +26,10 @@ class TestScanFileContent:
         assert findings == []
 
     def test_multiple_findings_on_same_file(self) -> None:
+        # Use fake test key that won't trigger GitHub secret scanning
         content = (
             'password = "realvalue"\n'
-            'STRIPE = "sk_test_FAKE_KEY_123456789012345678901234"\n'
+            'STRIPE = "sk_test_abcdefghijklmnopqrstuvwxyz123456"\n'
         )
         findings = scan_file_content(Path("x.py"), content)
         rule_ids = {f.rule_id for f in findings}

@@ -6,6 +6,9 @@
 # The scanner itself (test fixtures contain intentional secrets for testing).
 code_scanner/tests/fixtures/**
 
+# Test files contain intentional fake secrets/PII for testing the scanner.
+code_scanner/tests/test_*.py
+
 # Generated files unlikely to contain secrets.
 **/__pycache__/**
 **/*.pyc

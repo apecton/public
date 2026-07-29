@@ -63,12 +63,14 @@ class TestGitHubToken:
 
 class TestStripeKey:
     def test_detects_live_key(self) -> None:
-        content = 'STRIPE = "sk_test_FAKE_KEY_123456789012345678901234"'
+        # Use fake test key (24+ alphanumeric chars) that won't trigger GitHub secret scanning
+        content = 'STRIPE = "sk_test_abcdefghijklmnopqrstuvwxyz123456"'
         results = _scan(content)
         assert ("SEC-005", Severity.CRITICAL) in results
 
     def test_detects_test_key(self) -> None:
-        content = 'KEY = "sk_test_FAKE_KEY_098765432109876543210987"'
+        # Use fake test key (24+ alphanumeric chars) that won't trigger GitHub secret scanning
+        content = 'KEY = "sk_test_FAKE_KEY_abcdefghijklmnopqrstuvwx"'
         results = _scan(content)
         assert ("SEC-005", Severity.CRITICAL) in results
 

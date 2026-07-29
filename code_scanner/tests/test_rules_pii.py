@@ -56,16 +56,19 @@ class TestPhoneDetection:
 
 class TestSinDetection:
     def test_detects_canadian_sin(self) -> None:
+        # Use obviously fake SIN that won't trigger GitHub secret scanning
         results = _scan("sin = '111 111 111'")
         assert ("PII-003", Severity.CRITICAL) in results
 
     def test_detects_hyphenated_sin(self) -> None:
+        # Use obviously fake SIN that won't trigger GitHub secret scanning
         results = _scan("sin = '111-111-111'")
         assert ("PII-003", Severity.CRITICAL) in results
 
 
 class TestSsnDetection:
     def test_detects_us_ssn(self) -> None:
+        # Use obviously fake SSN that won't trigger GitHub secret scanning
         results = _scan("ssn = '111-11-1111'")
         assert ("PII-004", Severity.CRITICAL) in results
 

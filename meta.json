@@ -1,0 +1,265 @@
+{
+  "meta_version": "1.0",
+  "generated_at": "2026-07-29T00:00:25.663122+00:00",
+  "generator": {
+    "model": "Meta-Llama-3.1-8B-Instruct-Q4_K_M",
+    "provider": "openai_compat",
+    "prompt_version_py": "6164b089",
+    "prompt_version_generic": "876d2293",
+    "generated_at": "2026-07-29T00:00:25.663122+00:00"
+  },
+  "input_dir": "C:\\dev\\workspace\\public",
+  "output_dir": "C:\\dev\\workspace\\public",
+  "overview": "This group of files collectively provides a comprehensive code scanner application that scans files and directories for security vulnerabilities, interacts with Git repositories, and generates reports on scanning results. It includes detection rules for various types of vulnerabilities, such as infrastructure-related issues, personally identifiable information (PII), and secrets. The application uses these components to provide a robust code scanning solution.",
+  "files": [
+    {
+      "path": "code_scanner/main.py",
+      "extension": ".py",
+      "purpose": "Main entry point for the code scanner application.",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "returns": "int",
+          "description": "Executes the main functionality of the code scanner and returns an integer result."
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/file_scanner.py",
+      "extension": ".py",
+      "purpose": "A module for scanning files and directories for security vulnerabilities.",
+      "functions": [
+        {
+          "name": "scan_file_content",
+          "params": [
+            "file_path: Path",
+            "content: str",
+            "rules: list[Rule] | None"
+          ],
+          "returns": "list[Finding]",
+          "description": "Scans the content of a file for security vulnerabilities."
+        },
+        {
+          "name": "scan_file",
+          "params": [
+            "file_path: Path",
+            "content_reader: Callable[[Path], str | None] | None",
+            "rules: list[Rule] | None"
+          ],
+          "returns": "list[Finding]",
+          "description": "Scans a file for security vulnerabilities using a provided content reader or default behavior."
+        },
+        {
+          "name": "scan_directory",
+          "params": [
+            "directory: Path",
+            "ignore_patterns: list[re.Pattern[str]] | None",
+            "rules: list[Rule] | None"
+          ],
+          "returns": "ScanResult",
+          "description": "Scans a directory and its contents for security vulnerabilities."
+        },
+        {
+          "name": "scan_files_list",
+          "params": [
+            "files: list[Path]",
+            "content_reader: Callable[[Path], str | None] | None",
+            "ignore_patterns: list[re.Pattern[str]] | None",
+            "rules: list[Rule] | None"
+          ],
+          "returns": "ScanResult",
+          "description": "Scans a list of files for security vulnerabilities."
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/git.py",
+      "extension": ".py",
+      "purpose": "Provides functionality for interacting with Git repositories.",
+      "functions": [
+        {
+          "name": "get_repo_root",
+          "params": [
+            "start: Path"
+          ],
+          "returns": "Path",
+          "description": "Returns the root directory of a Git repository."
+        },
+        {
+          "name": "get_staged_files",
+          "params": [
+            "repo_root: Path",
+            "path_filter: Path | None"
+          ],
+          "returns": "list[Path]",
+          "description": "Returns a list of staged files in the repository, optionally filtered by path."
+        },
+        {
+          "name": "get_diff_files",
+          "params": [
+            "repo_root: Path",
+            "base_branch: str",
+            "path_filter: Path | None"
+          ],
+          "returns": "list[Path]",
+          "description": "Returns a list of files showing differences between branches in the repository, optionally filtered by path."
+        },
+        {
+          "name": "read_staged_content",
+          "params": [
+            "repo_root: Path",
+            "file_path: Path"
+          ],
+          "returns": "str | None",
+          "description": "Reads and returns the content of a staged file."
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/models.py",
+      "extension": ".py",
+      "purpose": "Provides data models for code scanning",
+      "classes": [
+        {
+          "name": "Severity",
+          "description": "Represents the severity level of a finding",
+          "public_methods": [
+            "order"
+          ]
+        },
+        {
+          "name": "Finding",
+          "description": "Represents a single finding in a code scan",
+          "public_methods": []
+        },
+        {
+          "name": "ScanResult",
+          "description": " Represents the result of a code scan",
+          "public_methods": [
+            "by_severity",
+            "has_blocking_issues",
+            "total"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/reporter.py",
+      "extension": ".py",
+      "purpose": "This module provides a reporter class for generating and saving reports from code scanning results.",
+      "classes": [
+        {
+          "name": "Reporter",
+          "description": "A class responsible for generating and saving reports from code scanning results.",
+          "public_methods": [
+            "print_report",
+            "print_json",
+            "save_report"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/rules/base_rule.py",
+      "extension": ".py",
+      "purpose": "Provides a base class for detection rules.",
+      "classes": [
+        {
+          "name": "Rule",
+          "description": "Represents a single detection rule.",
+          "public_methods": []
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/rules/filetypes.py",
+      "extension": ".py",
+      "purpose": "This module defines rules for file types.",
+      "functions": [
+        {
+          "name": "get_file_type",
+          "params": [],
+          "returns": null,
+          "description": "Returns the file type based on the given filename."
+        },
+        {
+          "name": "is_supported_file_type",
+          "params": [],
+          "returns": null,
+          "description": "Checks if a file type is supported by the application."
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/rules/infra.py",
+      "extension": ".py",
+      "purpose": "Provides infrastructure-related rules for code scanning.",
+      "functions": [
+        {
+          "name": "load_infra_rules",
+          "params": [],
+          "returns": null,
+          "description": "Loads infrastructure-related rules from a configuration file."
+        },
+        {
+          "name": "get_infra_rule",
+          "params": [],
+          "returns": null,
+          "description": "Returns an infrastructure rule by its ID."
+        },
+        {
+          "name": "validate_infra_resource",
+          "params": [],
+          "returns": null,
+          "description": "Validates an infrastructure resource against the loaded rules."
+        }
+      ],
+      "classes": [
+        {
+          "name": "InfraRule",
+          "description": "Represents an infrastructure-related rule with its ID and validation logic.",
+          "public_methods": []
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/rules/pii.py",
+      "extension": ".py",
+      "purpose": "This module contains rules for detecting Personally Identifiable Information (PII) in code.",
+      "functions": [
+        {
+          "name": "get_pii_keywords",
+          "params": [],
+          "returns": null,
+          "description": "Returns a set of keywords to detect PII in code."
+        },
+        {
+          "name": "detect_pii",
+          "params": [],
+          "returns": null,
+          "description": "Detects PII in the given code snippet using the provided keywords."
+        }
+      ]
+    },
+    {
+      "path": "code_scanner/src/rules/secrets.py",
+      "extension": ".py",
+      "purpose": "This module contains rules for detecting secrets in code.",
+      "functions": [
+        {
+          "name": "find_secrets",
+          "params": [],
+          "returns": null,
+          "description": "Detects and returns a list of potential secret values in the code."
+        },
+        {
+          "name": "is_secret",
+          "params": [],
+          "returns": null,
+          "description": "Checks if a given value is a potential secret."
+        }
+      ]
+    }
+  ]
+}
