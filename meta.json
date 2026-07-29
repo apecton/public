@@ -1,16 +1,16 @@
 {
   "meta_version": "1.0",
-  "generated_at": "2026-07-29T00:00:25.663122+00:00",
+  "generated_at": "2026-07-29T00:02:20.839498+00:00",
   "generator": {
     "model": "Meta-Llama-3.1-8B-Instruct-Q4_K_M",
     "provider": "openai_compat",
     "prompt_version_py": "6164b089",
     "prompt_version_generic": "876d2293",
-    "generated_at": "2026-07-29T00:00:25.663122+00:00"
+    "generated_at": "2026-07-29T00:02:20.839498+00:00"
   },
   "input_dir": "C:\\dev\\workspace\\public",
   "output_dir": "C:\\dev\\workspace\\public",
-  "overview": "This group of files collectively provides a comprehensive code scanner application that scans files and directories for security vulnerabilities, interacts with Git repositories, and generates reports on scanning results. It includes detection rules for various types of vulnerabilities, such as infrastructure-related issues, personally identifiable information (PII), and secrets. The application uses these components to provide a robust code scanning solution.",
+  "overview": "This group of files collectively provides a comprehensive code scanning application that scans files and directories for security vulnerabilities, interacts with Git repositories, and generates reports on detection results. The application utilizes a set of predefined rules for detecting infrastructure-related issues, personally identifiable information (PII), and secrets in code, while also providing a flexible base class for custom rule extensions.",
   "files": [
     {
       "path": "code_scanner/main.py",

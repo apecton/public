@@ -26,7 +26,7 @@ class TestScanFileContent:
         assert findings == []
 
     def test_multiple_findings_on_same_file(self) -> None:
-        # Use fake test key that won't trigger GitHub secret scanning
+        # Use fake test key that matches Stripe pattern (sk_test_ + 24+ alnum)
         content = (
             'password = "realvalue"\n'
             'STRIPE = "sk_test_abcdefghijklmnopqrstuvwxyz123456"\n'
