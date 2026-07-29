@@ -12,3 +12,4 @@ node_modules/
 sample*.txt
 
 .meta_gen.lock
+meta*.json
