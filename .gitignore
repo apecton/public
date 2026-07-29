@@ -10,3 +10,5 @@ node_modules/
 .tmp/
 
 sample*.txt
+
+.meta_gen.lock
