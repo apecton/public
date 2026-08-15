@@ -16,6 +16,7 @@ $Script:ProjectRoot   = Split-Path $Script:ScriptPath -Parent
 $Script:TimestampFile = Join-Path $Script:ProjectRoot '.claude_session_trigger'
 $Script:LogFile       = Join-Path $Script:ProjectRoot '.claude_session_trigger.log'
 $Script:WindowHours   = 5
+$Script:StartupHour   = 6   # default startup hour (0-23)
 $Script:NextTaskName  = 'ClaudeAutoTrigger_Next'
 $Script:MaxLogLines   = 1000
 
@@ -53,6 +54,32 @@ function Save-TriggerTime {
     param([DateTime]$Time)
     Set-Content -Path $Script:TimestampFile -Value ($Time.ToString('o')) -Encoding UTF8
 }
+
+
+# ---------------------------------------------------------------------------
+# Helper: adjust next trigger time to preferred startup hour window
+# ---------------------------------------------------------------------------
+function Get-AdjustedNextTime {
+    param([DateTime]$BaseTime)
+    $intervalHours = $Script:WindowHours
+    $startupHour   = $Script:StartupHour
+
+    # Calculate raw next time based on interval
+    $rawNext = $BaseTime.AddHours($intervalHours)
+
+    # Determine how many hours before the startup hour the rawNext time is (on a 24‑hour circle)
+    $hoursBeforeStartup = ($startupHour - $rawNext.TimeOfDay.TotalHours + 24) % 24
+    if ($hoursBeforeStartup -lt $intervalHours) {
+        # rawNext lies within the interval before the startup hour → round up to the next startup hour
+        $adjusted = $rawNext.Date.AddHours($startupHour)
+        if ($adjusted -lt $rawNext) {
+            $adjusted = $adjusted.AddDays(1)
+        }
+        return $adjusted
+    }
+    else {
+        return $rawNext
+    }
 
 # ---------------------------------------------------------------------------
 # Task Scheduler helpers
@@ -164,8 +191,9 @@ function Invoke-Main {
             Write-Log ("Window elapsed ({0}h {1}m) -- triggering" -f [int]$elapsed.Hours, [int]$elapsed.Minutes)
             $shouldTrigger = $true
         } else {
-            $nextTime  = $lastTrigger.AddHours($Script:WindowHours)
-            $remaining = $nextTime - $now
+            $rawNextTime = $lastTrigger.AddHours($Script:WindowHours)
+            $nextTime    = Get-AdjustedNextTime -BaseTime $lastTrigger
+            $remaining   = $nextTime - $now
             Write-Log ("Window open -- {0}h {1}m remaining (next: {2:HH:mm:ss})" -f `
                 [int]$remaining.Hours, [int]$remaining.Minutes, $nextTime)
 
@@ -182,7 +210,8 @@ function Invoke-Main {
         if ($ok) {
             $triggerTime = Get-Date
             Save-TriggerTime $triggerTime
-            Register-NextTask $triggerTime.AddHours($Script:WindowHours)
+            $nextTrigger = Get-AdjustedNextTime -BaseTime $triggerTime
+            Register-NextTask $nextTrigger
         }
     }
 }

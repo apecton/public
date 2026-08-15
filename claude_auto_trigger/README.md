@@ -1,20 +1,20 @@
 # claude_auto_trigger
 
-Windows utility that fires a Claude Code session at the **exact moment** the 5-hour usage window resets, maximising available quota without guessing.
+Windows utility that fires a Claude Code session at the precise moment the usage window resets (default 5‑hour window), with optional alignment to a preferred startup hour (default 7 AM) to maximise available quota without guessing.
 
 ## How it works
 
-Claude Code's usage limit is a **5-hour rolling window** that starts with your first message. Once that window expires, sending any message opens a fresh window.
+Claude Code's usage limit is a **rolling window** (default 5 hours) that starts with your first message. Once that window expires, sending any message opens a fresh window.
 
-This utility tracks when the last session was started and schedules the next trigger for precisely `last_trigger + 5h`.
+This utility tracks when the last session was started and schedules the next trigger for `last_trigger + WindowHours`, then, if that time falls within the interval before the configured `StartupHour`, it rounds the trigger up to the next occurrence of the startup hour.
 
 It runs the check on three signals, so the window is never left to drift:
 
-- **While the machine is awake** — a one-shot `_Next` task fires exactly at `last_trigger + 5h`.
+- **While the machine is awake** — a one-shot `_Next` task fires exactly at `last_trigger + WindowHours` (adjusted for startup hour if needed).
 - **At logon** (cold boot / restart) — the check runs as soon as you log in.
 - **On resume from sleep or hibernate** — an event-based trigger (Power-Troubleshooter event 1) runs the check the moment the machine wakes.
 
-The check itself is idempotent: it triggers a session only if the 5-hour window has elapsed, otherwise it just re-confirms the schedule and exits. So firing it on every logon/wake is cheap and safe.
+The check itself is idempotent: it triggers a session only if the window has elapsed (after adjustment), otherwise it just re-confirms the schedule and exits. So firing it on every logon/wake is cheap and safe.
 
 ```
 Boot, log in at 7:15
@@ -35,6 +35,17 @@ No polling. No arbitrary hourly ticks.
 - PowerShell 5.1+ (built in)
 - [Claude Code](https://claude.ai/code) installed and `claude` on your PATH
 - Pester 5+ (for tests only): `Install-Module Pester -Force -Scope CurrentUser`
+
+## Configuration
+
+The script defines two variables at the top of `claude_auto_trigger.ps1`:
+
+- `$Script:WindowHours` – length of the usage window in hours (default **5**).
+- `$Script:StartupHour` – preferred start‑of‑day hour in 24‑hour format (default **7** for 7 AM).
+
+When the next calculated trigger time falls within the interval before the startup hour, the script rounds the trigger up to the next occurrence of the startup hour. This aligns sessions with your working day while still respecting the window length.
+
+Example (defaults): if the last session ended at 2 AM, the raw next trigger would be at 7 AM (2 + 5). Since 7 AM is the startup hour, it stays at 7 AM. If the last session ended at 10 PM, raw next is 3 AM, which lies within the 2‑hour‑to‑7 AM window, so the script pushes the trigger to 7 AM.
 
 ## Install
 
@@ -71,7 +82,7 @@ Both files are git-ignored.
 | Task | Trigger | Notes |
 |---|---|---|
 | `ClaudeAutoTrigger_Startup` | At user logon (60s delay) **and** on resume from sleep/hibernate (Power-Troubleshooter event 1, 30s delay) | Created by `setup_task.ps1`, never deleted |
-| `ClaudeAutoTrigger_Next` | One-shot at `last_trigger + 5h` | Created/overwritten by the script after each trigger |
+| `ClaudeAutoTrigger_Next` | One-shot at `last_trigger + WindowHours` (adjusted for startup hour) | Created/overwritten by the script after each trigger |
 
 ## Manual test
 
