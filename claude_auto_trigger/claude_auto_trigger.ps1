@@ -80,6 +80,7 @@ function Get-AdjustedNextTime {
     else {
         return $rawNext
     }
+}
 
 # ---------------------------------------------------------------------------
 # Task Scheduler helpers
