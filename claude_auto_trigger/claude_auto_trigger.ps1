@@ -86,7 +86,12 @@ function Get-AdjustedNextTime {
 # Task Scheduler helpers
 # ---------------------------------------------------------------------------
 function Test-NextTaskExists {
-    return [bool](Get-ScheduledTask -TaskName $Script:NextTaskName -ErrorAction SilentlyContinue)
+    $out = & schtasks /query /tn $Script:NextTaskName 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        return $true
+    } else {
+        return $false
+    }
 }
 
 function Register-NextTask {
@@ -99,42 +104,13 @@ function Register-NextTask {
 
     $psArg = "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$Script:ScriptPath`""
 
-    try {
-        # Remove any existing entry first; a task created under an elevated token
-        # cannot be force-overwritten by a non-elevated process.
-        Unregister-ScheduledTask -TaskName $Script:NextTaskName -Confirm:$false -ErrorAction SilentlyContinue
-
-        $action   = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $psArg
-        $trigger  = New-ScheduledTaskTrigger -Once -At $At
-        $settings = New-ScheduledTaskSettingsSet `
-            -StartWhenAvailable `
-            -ExecutionTimeLimit (New-TimeSpan -Minutes 5) `
-            -MultipleInstances  IgnoreNew
-        $principal = New-ScheduledTaskPrincipal `
-            -UserId    ([System.Security.Principal.WindowsIdentity]::GetCurrent().Name) `
-            -LogonType Interactive `
-            -RunLevel  Limited
-
-        Register-ScheduledTask `
-            -TaskName  $Script:NextTaskName `
-            -Action    $action `
-            -Trigger   $trigger `
-            -Settings  $settings `
-            -Principal $principal `
-            -Force     -ErrorAction Stop | Out-Null
-
-        Write-Log "Scheduled '$($Script:NextTaskName)' for $($At.ToString('yyyy-MM-dd HH:mm:ss'))"
-    } catch {
-        # Fallback: schtasks.exe (different permission surface)
-        Write-Log "Register-ScheduledTask failed ($_) -- retrying via schtasks.exe" 'WARN'
-        $sd  = $At.ToString('MM\/dd\/yyyy')
-        $st  = $At.ToString('HH:mm')
-        $out = & schtasks /create /tn $Script:NextTaskName /tr "powershell.exe $psArg" /sc once /sd $sd /st $st /f 2>&1
-        if ($LASTEXITCODE -eq 0) {
-            Write-Log "Scheduled via schtasks for $($At.ToString('yyyy-MM-dd HH:mm'))"
-        } else {
-            Write-Log "FAILED to schedule next task: $out" 'ERROR'
-        }
+    $sd  = $At.ToString('MM\/dd\/yyyy')
+    $st  = $At.ToString('HH:mm')
+    $out = & schtasks /create /tn $Script:NextTaskName /tr "powershell.exe $psArg" /sc once /sd $sd /st $st /f 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Log "Scheduled '$($Script:NextTaskName)' for $($At.ToString('yyyy-MM-dd HH:mm'))"
+    } else {
+        Write-Log "FAILED to schedule next task: $out" 'ERROR'
     }
 }
 
