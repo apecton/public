@@ -69,7 +69,8 @@ function Get-AdjustedNextTime {
 
     # Determine how many hours before the startup hour the rawNext time is (on a 24‑hour circle)
     $hoursBeforeStartup = ($startupHour - $rawNext.TimeOfDay.TotalHours + 24) % 24
-    if ($hoursBeforeStartup -lt $intervalHours) {
+    # Use -le to include the exact boundary (e.g., exactly 5h before 6AM = 1AM should round up)
+    if ($hoursBeforeStartup -le $intervalHours) {
         # rawNext lies within the interval before the startup hour → round up to the next startup hour
         $adjusted = $rawNext.Date.AddHours($startupHour)
         if ($adjusted -lt $rawNext) {
@@ -104,13 +105,30 @@ function Register-NextTask {
 
     $psArg = "-NonInteractive -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$Script:ScriptPath`""
 
-    $sd  = $At.ToString('MM\/dd\/yyyy')
-    $st  = $At.ToString('HH:mm')
-    $out = & schtasks /create /tn $Script:NextTaskName /tr "powershell.exe $psArg" /sc once /sd $sd /st $st /f 2>&1
-    if ($LASTEXITCODE -eq 0) {
+    $Action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $psArg
+    $Trigger = New-ScheduledTaskTrigger -Once -At $At
+    $Settings = New-ScheduledTaskSettingsSet `
+        -ExecutionTimeLimit (New-TimeSpan -Minutes 5) `
+        -MultipleInstances IgnoreNew `
+        -StartWhenAvailable
+    $UserId = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $Principal = New-ScheduledTaskPrincipal `
+        -UserId $UserId `
+        -LogonType Interactive `
+        -RunLevel Limited
+
+    try {
+        Register-ScheduledTask `
+            -TaskName $Script:NextTaskName `
+            -Action $Action `
+            -Trigger $Trigger `
+            -Settings $Settings `
+            -Principal $Principal `
+            -Description 'One-shot trigger for next Claude Code window reset' `
+            -Force | Out-Null
         Write-Log "Scheduled '$($Script:NextTaskName)' for $($At.ToString('yyyy-MM-dd HH:mm'))"
-    } else {
-        Write-Log "FAILED to schedule next task: $out" 'ERROR'
+    } catch {
+        Write-Log "FAILED to schedule next task: $_" 'ERROR'
     }
 }
 
